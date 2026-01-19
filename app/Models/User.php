@@ -21,7 +21,23 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function surats()
+    {
+        return $this->hasMany(Surat::class);
+    }
+
+    public function approvedSurats()
+    {
+        return $this->hasMany(Surat::class, 'approved_by');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
