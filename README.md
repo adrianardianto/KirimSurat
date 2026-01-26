@@ -1,59 +1,162 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ✉️ KirimSurat
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
-## About Laravel
+**KirimSurat** adalah Sistem Informasi Manajemen Persuratan berbasis web yang dirancang untuk memodernisasi dan menyederhanakan alur kerja administrasi surat-menyurat dalam organisasi. Dari pembuatan draf hingga persetujuan dan pengarsipan, KirimSurat menyediakan solusi _end-to-end_ yang efisien.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🌟 Fitur Unggulan
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Aplikasi ini dibangun dengan fokus pada efisiensi dan kemudahan penggunaan:
 
-## Learning Laravel
+### 📝 Manajemen Surat (Surat Masuk & Keluar)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **Pembuatan Surat Digital**: Editor formulir yang intuitif untuk membuat surat dinas.
+- **Penomoran Otomatis**: Generate nomor surat otomatis berdasarkan format kategori (misal: `001/IZN/2024`) untuk memastikan konsistensi.
+- **Export ke PDF**: Unduh surat yang telah disetujui langsung ke format PDF siap cetak.
+- **Status Tracking**: Pantau status surat secara real-time (`Pending`, `Approved`, `Rejected`).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🏷️ Manajemen Kategori Dinamis
 
-## Laravel Sponsors
+- **Kategorisasi Surat**: Kelola jenis surat (Izin, Tugas, Undangan, dll) dengan mudah.
+- **Kode Surat Kustom**: Atur kode singkatan surat (misal: 'IZN', 'DSP') yang akan otomatis disisipkan ke nomor surat.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 👥 Role-Based Access Control (RBAC)
 
-### Premium Partners
+- **Administrator**:
+    - Mengelola seluruh pengguna (User Management CRUD).
+    - Menyetujui atau menolak surat (Approval Workflow).
+    - Mengakses log aktivitas sistem.
+    - Mengelola kategori surat.
+- **User / Staff**:
+    - Mengajukan surat baru.
+    - Melihat riwayat surat pribadi.
+    - Mengunduh surat yang telah disetujui.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 🛡️ Keamanan & Monitoring
 
-## Contributing
+- **Audit Logs**: Merekam jejak aktivitas pengguna untuk transparansi dan keamanan data.
+- **Secure Authentication**: Login aman menggunakan sistem otentikasi Laravel.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🛠️ Teknologi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Backend:**
 
-## Security Vulnerabilities
+- [Laravel 12](https://laravel.com) - Framework PHP modern.
+- MySql / SQLite - Penyimpanan data relasional.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Frontend:**
 
-## License
+- [Blade Templates](https://laravel.com/docs/blade) - Engine templating server-side.
+- [Tailwind CSS](https://tailwindcss.com) - Framework CSS untuk styling antarmuka.
+- [Alpine.js](https://alpinejs.dev) - Interaktivitas frontend yang ringan.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Utilities:**
+
+- `barryvdh/laravel-dompdf` - Pembuatan dokumen PDF.
+- `Vite` - Build tool aset frontend.
+
+---
+
+## 🚀 Instalasi & Konfigurasi
+
+Ikuti langkah langkah ini untuk menjalankan proyek di lokal komputer Anda.
+
+### Prasyarat
+
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
+
+### Langkah Instalasi
+
+1.  **Clone Repository**
+
+    ```bash
+    git clone https://github.com/adrianardianto/KirimSurat.git
+    cd KirimSurat
+    ```
+
+2.  **Install Dependencies Backend & Frontend**
+
+    ```bash
+    composer install
+    npm install
+    ```
+
+3.  **Konfigurasi Environment**
+    Salin file contoh konfigurasi dan buat file `.env` baru.
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Buka file `.env` dan sesuaikan pengaturan database Anda (DB_DATABASE, dll).
+
+    ```bash
+    # Contoh untuk SQLite (Default)
+    DB_CONNECTION=sqlite
+    # Hapus DB_DATABASE, DB_USERNAME, dll jika menggunakan SQLite default Laravel 11/12
+    ```
+
+4.  **Generate App Key**
+
+    ```bash
+    php artisan key:generate
+    ```
+
+5.  **Setup Database**
+    Jalankan migrasi untuk membuat struktur tabel.
+
+    ```bash
+    php artisan migrate
+    ```
+
+    _(Opsional) Jalankan seeder jika tersedia untuk data dummy:_
+
+    ```bash
+    php artisan db:seed
+    ```
+
+6.  **Jalankan Aplikasi**
+    Buka dua terminal terpisah untuk menjalankan server lokal dan build assets.
+
+    _Terminal 1 (Laravel Server):_
+
+    ```bash
+    php artisan serve
+    ```
+
+    _Terminal 2 (Vite Development):_
+
+    ```bash
+    npm run dev
+    ```
+
+🎉 **Selesai!** Buka browser dan akses aplikasi di `http://127.0.0.1:8000`.
+
+---
+
+## 📸 Antarmuka Aplikasi
+
+_(Tambahkan screenshot aplikasi di sini nanti)_
+
+|                                   Dashboard                                    |                                Surat Editor                                |
+| :----------------------------------------------------------------------------: | :------------------------------------------------------------------------: |
+| ![Dashboard Placehoder](https://via.placeholder.com/400x200?text=Dashboard+UI) | ![Editor Placeholder](https://via.placeholder.com/400x200?text=Surat+Form) |
+
+---
+
+## 🤝 Kontribusi
+
+Kontribusi selalu diterima! Silakan buat **Pull Request** baru untuk perbaikan bug atau penambahan fitur.
+
+## 📄 Lisensi
+
+KirimSurat didistribusikan di bawah lisensi [MIT](https://opensource.org/licenses/MIT).
