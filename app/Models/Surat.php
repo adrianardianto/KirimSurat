@@ -12,7 +12,7 @@ class Surat extends Model
     protected $fillable = [
         'type', 'reference_number', 'date', 'sender', 'recipient',
         'subject', 'content', 'status', 'file_path',
-        'category_id', 'user_id', 'approved_by', 'approved_at'
+        'category_id', 'user_id', 'approved_by', 'approved_at', 'rejection_reason'
     ];
 
     protected $casts = [

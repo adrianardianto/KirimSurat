@@ -28,12 +28,12 @@ class SuratPolicy
 
     public function update(User $user, Surat $surat): bool
     {
-        return $user->isAdmin() || ($user->id === $surat->user_id && $surat->status === 'draft');
+        return $user->isAdmin() || ($user->id === $surat->user_id && in_array($surat->status, ['draft', 'pending']));
     }
 
     public function delete(User $user, Surat $surat): bool
     {
-        return $user->isAdmin() || ($user->id === $surat->user_id && $surat->status === 'draft');
+        return $user->isAdmin() || ($user->id === $surat->user_id && in_array($surat->status, ['draft', 'pending']));
     }
 
     public function restore(User $user, Surat $surat): bool
