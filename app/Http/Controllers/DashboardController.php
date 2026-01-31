@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuditLog;
 use App\Models\Surat;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -14,25 +14,38 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->isAdmin()) {
-            $stats = [
-                'surat_masuk' => Surat::where('type', 'masuk')->count(),
-                'surat_keluar' => Surat::where('type', 'keluar')->count(),
-                'pending' => Surat::where('status', 'pending')->count(),
-                'users' => User::count(),
-            ];
-            $recent_logs = AuditLog::with('user')->latest()->take(5)->get();
-            $recent_surats = Surat::with('user')->latest()->take(5)->get();
-        } else {
-            $stats = [
-                'surat_masuk' => Surat::where('type', 'masuk')->where('user_id', $user->id)->count(),
-                'surat_keluar' => Surat::where('type', 'keluar')->where('user_id', $user->id)->count(),
-                'pending' => Surat::where('status', 'pending')->where('user_id', $user->id)->count(),
-            ];
-            $recent_logs = AuditLog::where('user_id', $user->id)->latest()->take(5)->get();
-            $recent_surats = Surat::where('user_id', $user->id)->latest()->take(5)->get();
+        // If admin, show global stats. If user, maybe show their stats?
+        // Screenshot shows "Administrator", so assuming admin view.
+        // Let's allow users to see their own stats if not admin.
+        
+        $querySurat = Surat::query();
+        if (!$user->isAdmin()) {
+             $querySurat->where('user_id', $user->id);
         }
 
-        return view('dashboard', compact('stats', 'recent_logs', 'recent_surats'));
+        // Optimized aggregation query
+        $stats = (clone $querySurat)->toBase()
+            ->selectRaw("count(*) as total")
+            ->selectRaw("count(case when status = 'approved' then 1 end) as approved")
+            ->selectRaw("count(case when status = 'pending' then 1 end) as pending")
+            ->first();
+
+        $totalSurat = $stats->total;
+        $approvedSurat = $stats->approved;
+        $pendingSurat = $stats->pending;
+        
+        $totalUser = User::count(); // Admin sees all users count usually.
+
+        $recentSurats = (clone $querySurat)->with(['category', 'user'])->latest()->take(5)->get();
+
+        return Inertia::render('Dashboard', [
+            'stats' => [
+                'total_surat' => $totalSurat,
+                'disetujui' => $approvedSurat,
+                'pending' => $pendingSurat,
+                'total_user' => $totalUser,
+            ],
+            'recent_surats' => $recentSurats,
+        ]);
     }
 }

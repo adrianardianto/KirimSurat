@@ -7,15 +7,17 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use Inertia\Inertia;
+
 class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::all()->map(function($cat) {
-            $cat->count = \App\Models\Surat::where('type', $cat->code)->count();
+        $categories = Category::withCount('surats')->get()->map(function($cat) {
+            $cat->count = $cat->surats_count;
             return $cat;
         });
-        return view('categories.index', compact('categories'));
+        return Inertia::render('Categories/Index', compact('categories'));
     }
 
     public function store(Request $request)

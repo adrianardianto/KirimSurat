@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class AuditLogController extends Controller
 {
@@ -11,6 +12,6 @@ class AuditLogController extends Controller
     {
         // Only admin can access this is handled by route/middleware or check here
         $logs = AuditLog::with('user')->latest()->paginate(20);
-        return view('audit.index', compact('logs'));
+        return Inertia::render('Audit/Index', ['logs' => $logs]);
     }
 }
