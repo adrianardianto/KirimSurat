@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -15,13 +16,13 @@ class UserController extends Controller
     {
         if (!Auth::user()->isAdmin()) abort(403);
         $users = User::latest()->paginate(10);
-        return view('users.index', compact('users'));
+        return Inertia::render('Users/Index', ['users' => $users]);
     }
 
     public function create()
     {
         if (!Auth::user()->isAdmin()) abort(403);
-        return view('users.create');
+        return Inertia::render('Users/Create');
     }
 
     public function store(Request $request)
@@ -55,7 +56,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         if (!Auth::user()->isAdmin()) abort(403);
-        return view('users.edit', compact('user'));
+        return Inertia::render('Users/Edit', ['user' => $user]);
     }
 
     public function update(Request $request, User $user)

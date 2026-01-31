@@ -8,12 +8,15 @@ use App\Models\Surat;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use App\Exports\SuratExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SuratController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Surat::with(['category', 'user']);
+        $query = Surat::with(['category']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -21,6 +24,7 @@ class SuratController extends Controller
                 $q->where('subject', 'like', "%$search%")
                   ->orWhere('reference_number', 'like', "%$search%")
                   ->orWhere('sender', 'like', "%$search%")
+                  ->orWhere('content', 'like', "%$search%")
                   ->orWhere('recipient', 'like', "%$search%");
             });
         }
@@ -33,49 +37,60 @@ class SuratController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+             $query->whereBetween('date', [$request->start_date, $request->end_date]);
+        }
+
         if (!Auth::user()->isAdmin()) {
-            // Users see their own surats, or maybe public ones?
-            // Requirement: "Lihat surat masuk, surat yang menunggu persetujuan, status surat yang dikirim"
-            // Assuming users can see all 'masuk' directed to them?
-            // Or simplified: Users see what they created.
-            // Let's stick to: Users see their own created letters for now.
-            // AND maybe Surat Masuk addressed to them? Not implemented recipient linking yet.
             $query->where('user_id', Auth::id());
         }
 
-        $surats = $query->latest()->paginate(10);
-        return view('surat.index', compact('surats'));
+        $surats = $query->latest()->paginate(10)->withQueryString();
+        
+        return Inertia::render('Surat/Index', [
+            'surats' => $surats,
+            'filters' => $request->only(['search', 'type', 'status', 'start_date', 'end_date']),
+        ]);
     }
 
     public function create()
     {
-        $categories = Category::all();
-        return view('surat.create', compact('categories'));
+        $categories = \Illuminate\Support\Facades\Cache::remember('categories', 60, function () {
+            return Category::all();
+        });
+        return Inertia::render('Surat/Create', compact('categories'));
     }
 
     public function getNextNumber(Request $request) {
-        $type = $request->input('type'); // Passed as the category ID/code actually?
-        // Wait, the view passes 'type' as the category CODE based on selection.
-        // Let's check create view later. For now, assume we receive 'type' as code (e.g. 'izin')
+        $type = $request->input('type'); // Category Code
         
         if (!$type) {
-            return response()->json(['number' => '']);
+            return response()->json(['number' => '']); // Or error
         }
 
-        $category = Category::where('code', $type)->first();
+        $category = Category::where('id', $type)->first(); // Typo in logic previously? Request sends ID usually.
+        // Wait, typical select sends ID. Let's assume ID.
+        if(!$category) {
+             // Fallback if type was actually the code or we need to find by code?
+             // If frontend sends ID, we use ID.
+             // If frontend sends Code, we use Code.
+             // Let's try to find by ID first, then Code.
+             $category = Category::where('code', $type)->orWhere('id', $type)->first();
+        }
+        
         if (!$category) return response()->json(['number' => '']);
 
         $formatCode = $category->format_code;
 
-        // Count existing surat this year for this specific Type
-        $count = Surat::whereYear('created_at', date('Y'))
-                      ->where('type', $type)
+        // Count existing surat this year for this specific Type (Category)
+        $count = Surat::whereYear('date', date('Y'))
+                      ->where('category_id', $category->id)
                       ->count() + 1;
         
         $monthRoman = $this->getRomanMonth(date('n'));
         $year = date('Y');
 
-        // Format: 001/IZN/I/2026 (Dynamic Format Code)
+        // Format: 001/IZN/I/2026
         $number = sprintf("%03d/%s/%s/%s", $count, $formatCode, $monthRoman, $year);
 
         return response()->json(['number' => $number]);
@@ -98,14 +113,17 @@ class SuratController extends Controller
             'sender' => 'required|string',
             'recipient' => 'required|string',
             'subject' => 'required|string',
-            'content' => 'required|string', // Now Required
+            'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'file_attachment' => 'required|file|mimes:pdf,jpg,png|max:2048' // Now Required
+            'file_attachment' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
         ]);
 
         $path = null;
         if ($request->hasFile('file_attachment')) {
-            $path = $request->file('file_attachment')->store('attachments', 'public');
+            $uploadedPath = $request->file('file_attachment')->store('attachments', 'public');
+            if ($uploadedPath) {
+                $path = $uploadedPath;
+            }
         }
 
         $surat = Surat::create([
@@ -116,7 +134,7 @@ class SuratController extends Controller
             'recipient' => $request->recipient,
             'subject' => $request->subject,
             'content' => $request->content,
-            'status' => 'pending', // Default pending
+            'status' => 'pending',
             'file_path' => $path,
             'category_id' => $request->category_id,
             'user_id' => Auth::id(),
@@ -135,7 +153,8 @@ class SuratController extends Controller
     public function show(Surat $surat)
     {
         $this->authorize('view', $surat);
-        return view('surat.show', compact('surat'));
+        $surat->load(['category', 'user']);
+        return Inertia::render('Surat/Show', compact('surat'));
     }
 
     public function approve(Request $request, Surat $surat)
@@ -157,7 +176,7 @@ class SuratController extends Controller
             'ip_address' => $request->ip()
         ]);
 
-        return back()->with('success', 'Surat approved.');
+        return redirect()->route('surat.show', $surat)->with('success', 'Surat approved.');
     }
 
     public function reject(Request $request, Surat $surat)
@@ -166,27 +185,32 @@ class SuratController extends Controller
             abort(403);
         }
 
+        $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
         $surat->update([
             'status' => 'rejected',
-            'approved_by' => Auth::id(), // Rejected by
+            'approved_by' => Auth::id(),
             'approved_at' => now(),
+            'rejection_reason' => $request->rejection_reason,
         ]);
 
          AuditLog::create([
             'user_id' => Auth::id(),
             'action' => 'REJECT_SURAT',
-            'description' => "Rejected surat {$surat->reference_number}",
+            'description' => "Rejected surat {$surat->reference_number}. Reason: {$request->rejection_reason}",
             'ip_address' => $request->ip()
         ]);
 
-        return back()->with('success', 'Surat rejected.');
+        return redirect()->route('surat.show', $surat)->with('success', 'Surat rejected.');
     }
 
     public function edit(Surat $surat)
     {
         $this->authorize('update', $surat);
         $categories = Category::all();
-        return view('surat.edit', compact('surat', 'categories'));
+        return Inertia::render('Surat/Edit', compact('surat', 'categories'));
     }
 
     public function update(Request $request, Surat $surat)
@@ -207,14 +231,11 @@ class SuratController extends Controller
         $data = $request->except(['file_attachment']);
         
         if ($request->hasFile('file_attachment')) {
-            $data['file_path'] = $request->file('file_attachment')->store('attachments', 'public');
+            $uploadedPath = $request->file('file_attachment')->store('attachments', 'public');
+            if ($uploadedPath) {
+                $data['file_path'] = $uploadedPath;
+            }
         }
-
-        // If user is editing, reset to pending if it was rejected?
-        // Let's assume editing is allowed for drafts or rejected.
-        // For now, if draft, it stays draft until they submit?
-        // Actually store set it to pending. Let's keep status as is or reset to pending if it was rejected.
-        // Simple logic: just update data.
 
         $surat->update($data);
 
@@ -247,11 +268,64 @@ class SuratController extends Controller
     public function downloadPdf(Surat $surat)
     {
         $this->authorize('view', $surat);
-        $pdf = Pdf::loadView('surat.pdf', compact('surat'));
         
-        // Sanitize reference number for filename
+        $base64Qr = null;
+        if ($surat->status === 'approved') {
+            $url = \Illuminate\Support\Facades\URL::signedRoute('surat.verify', ['surat' => $surat->id]);
+            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(100)->generate($url);
+            $base64Qr = 'data:image/svg+xml;base64,' . base64_encode($qrCode);
+        }
+
+        $pdf = Pdf::loadView('surat.pdf', compact('surat', 'base64Qr'));
+        
         $safeNumber = str_replace(['/', '\\'], '-', $surat->reference_number);
         
         return $pdf->download("surat-{$safeNumber}.pdf");
+    }
+
+    public function verify(Request $request, Surat $surat)
+    {
+        if (! $request->hasValidSignature()) {
+            abort(401);
+        }
+
+        return view('surat.verify', compact('surat'));
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new SuratExport($request->all()), 'laporan-surat.xlsx');
+    }
+
+    public function print(Request $request)
+    {
+        $query = Surat::with(['category', 'user']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('subject', 'like', "%$search%")
+                  ->orWhere('reference_number', 'like', "%$search%")
+                  ->orWhere('sender', 'like', "%$search%")
+                  ->orWhere('recipient', 'like', "%$search%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('date', [$request->start_date, $request->end_date]);
+        }
+        
+        $surats = $query->latest()->get();
+
+        $pdf = Pdf::loadView('reports.surat_pdf', compact('surats'));
+        return $pdf->stream('laporan-surat.pdf');
     }
 }
