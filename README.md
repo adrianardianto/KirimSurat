@@ -1,6 +1,7 @@
 # ✉️ KirimSurat
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
@@ -53,9 +54,17 @@ Aplikasi ini dibangun dengan fokus pada efisiensi dan kemudahan penggunaan:
 
 **Frontend:**
 
-- [Blade Templates](https://laravel.com/docs/blade) - Engine templating server-side.
-- [Tailwind CSS](https://tailwindcss.com) - Framework CSS untuk styling antarmuka.
-- [Alpine.js](https://alpinejs.dev) - Interaktivitas frontend yang ringan.
+- [React 18](https://react.dev) - Library JavaScript untuk antarmuka pengguna interaktif.
+- [Inertia.js](https://inertiajs.com) - Penghubung monolit modern antara Laravel & React.
+- [Tailwind CSS](https://tailwindcss.com) - Framework CSS utility-first.
+- [Headless UI](https://headlessui.com) - Komponen UI yang aksesibel dan tidak bergaya.
+
+**Performance & Optimization:**
+
+- **Database Indexing**: Optimasi query untuk pencarian dan filter cepat pada jutaan data.
+- **Gzip Compression**: Kompresi aset otomatis untuk waktu muat halaman yang kilat.
+- **Cache Optimization**: Implementasi caching pada data referensi (Categories).
+- **Vite Build**: Bundling aset modern dengan chunking cerdas.
 
 **Utilities:**
 
@@ -145,11 +154,10 @@ Ikuti langkah langkah ini untuk menjalankan proyek di lokal komputer Anda.
 
 ## 📸 Antarmuka Aplikasi
 
-_(Tambahkan screenshot aplikasi di sini nanti)_
-
-|                                   Dashboard                                    |                                Surat Editor                                |
-| :----------------------------------------------------------------------------: | :------------------------------------------------------------------------: |
-| ![Dashboard Placehoder](https://via.placeholder.com/400x200?text=Dashboard+UI) | ![Editor Placeholder](https://via.placeholder.com/400x200?text=Surat+Form) |
+<p align="center">
+  <img src="screenshot/Screenshot 2026-01-30 155705.png" alt="Dashboard UI" width="45%" />
+  <img src="screenshot/Screenshot 2026-01-30 155728.png" alt="Surat Editor" width="45%" />
+</p>
 
 ---
 
